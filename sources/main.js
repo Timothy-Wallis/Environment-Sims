@@ -11,6 +11,7 @@ class Obj {
             this.timer--;
             return;
         }
+        this.color = "transparent";
         delete this;
         return;
     }
@@ -39,12 +40,15 @@ let objects = [];
 let animationController = null;
 let animationEnable = false;
 let prgmRun = false;
+let timer = 500; //Timer used for each iteration
+let iterationCount = 0;
 
 const colors = ["brown", "white"];
 let priorityColor = colors[0];
 
 //main loop
 function main(){
+    timer--;
    animationController = requestAnimationFrame(main);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     for(let i = 0; i < objects.length; i++){
@@ -54,6 +58,14 @@ function main(){
         ctx.beginPath();
         ctx.arc(obj.x, obj.y, 5, 0, Math.PI * 2);
         ctx.fill();
+    }
+    ctx.fillStyle = "blue";
+    ctx.font = "24px Arial";
+    ctx.fillText(`Current Iteration: ${iterationCount}`, 10, 20);
+    if(timer <= 0){
+        timer = 500;
+        iterationCount++;
+        updateRenderArray();
     }
 }
 
@@ -89,9 +101,9 @@ function updateRenderArray(){
             tempColor = colors[1];
         }
         if(tempColor == priorityColor){
-            randomTimer = Math.floor((Math.random() - .25) * 1000 + 5000);
+            randomTimer = Math.floor((Math.random() - .25) * 1000 + 500);
         }else{
-            randomTimer = Math.floor((Math.random() - .5) * 1000 + 5000);
+            randomTimer = Math.floor((Math.random() - .5) * 1000 + 500);
         }
         objects.push(new Obj(Math.random() * canvas.width, Math.random() * canvas.height, randomTimer, tempColor));
     }
