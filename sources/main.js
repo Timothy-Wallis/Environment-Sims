@@ -15,8 +15,18 @@ class Obj {
         return;
     }
     moveRandom(){
-        this.x += (Math.random() - 0.5) * 10;
-        this.y += (Math.random() - 0.5) * 10;
+        let posx = (Math.random() - 0.5) * 10;
+        let posy = (Math.random() - 0.5) * 10;
+
+        if(this.x + posx < 0 || this.x + posx > canvas.width){
+            posx = -posx;
+        }
+        if(this.y + posy < 0 || this.y + posy > canvas.height){
+            posy = -posy;
+        }
+
+        this.x += posx;
+        this.y += posy;
     }
 }
 
@@ -28,6 +38,7 @@ canvas.height = window.innerHeight;
 let objects = [];
 let animationController = null;
 let animationEnable = false;
+let prgmRun = false;
 
 const colors = ["brown", "white"];
 let priorityColor = colors[0];
@@ -47,12 +58,42 @@ function main(){
 }
 
 
+
+
 //Start the simulation
 function startSim() {
+    if(!prgmRun){
+        prgmRun = true;
+        updateRenderArray();
+    }
     if(!animationEnable){
         animationEnable = true;
         main();
         return;
+    }
+}
+
+function updateRenderArray(){
+    //Updates render array based on the amount to be generated
+    let amount = document.getElementById("amountInput").value;
+    if(objects.length > 0){
+        objects = [];
+    }
+    for(let i = 0; i < amount; i++ ){
+        let tempCount = amount/2;
+        let tempColor = colors[0];
+        let randomTimer;
+        if(i < tempCount){
+            tempColor = colors[0];
+        }else{
+            tempColor = colors[1];
+        }
+        if(tempColor == priorityColor){
+            randomTimer = Math.floor((Math.random() - .25) * 1000 + 5000);
+        }else{
+            randomTimer = Math.floor((Math.random() - .5) * 1000 + 5000);
+        }
+        objects.push(new Obj(Math.random() * canvas.width, Math.random() * canvas.height, randomTimer, tempColor));
     }
 }
 
@@ -77,39 +118,10 @@ function resetSim() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     objects = [];
     pauseSim();
+    prgmRun = false;
 }
 
 document.getElementById("startBtn").addEventListener("click", startSim);
 document.getElementById("pauseBtn").addEventListener("click", pauseSim);
 document.getElementById("changeColorBtn").addEventListener("click", changePriorityColor);
-document.getElementById("amountInput").addEventListener("change", () => {
-    let amount = document.getElementById("amountInput").value;
-    //Check if input is within range
-    if(amount < 4) {
-        document.getElementById("amountInput").value = 4;
-    } else if(amount > 50) {
-        document.getElementById("amountInput").value = 50;
-    }
-    //After values corrected, append to list
-    amount = document.getElementById("amountInput").value;
-    if(objects.length > 0){
-        objects = [];
-    }
-    for(let i = 0; i < amount; i++ ){
-        let tempCount = amount/2;
-        let tempColor = colors[0];
-        let randomTimer;
-        if(i <= tempCount){
-            tempColor = colors[0];
-        }else{
-            tempColor = colors[1];
-        }
-        if(tempColor == priorityColor){
-            randomTimer = Math.floor((Math.random() - .25) * 1000 + 5000);
-        }else{
-            randomTimer = Math.floor((Math.random() - .5) * 1000 + 5000);
-        }
-        objects.push(new Obj(Math.random() * canvas.width, Math.random() * canvas.height, randomTimer, tempColor));
-    }
-});
 document.getElementById("resetBtn").addEventListener("click", resetSim);
