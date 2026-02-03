@@ -1,4 +1,3 @@
-let controller = 0;
 class Obj {
     constructor(x, y, timer, color){
         this.x = x;
@@ -13,7 +12,6 @@ class Obj {
             return;
         }
         this.color = "transparent";
-        controller++;
         delete this;
         return;
     }
@@ -45,6 +43,8 @@ class DeltaTime {
         return this.delta;
     }
 }
+
+
 let canvas = document.querySelector("canvas");
 let ctx = canvas.getContext("2d");
 canvas.width = window.innerWidth;
