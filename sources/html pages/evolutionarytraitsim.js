@@ -12,7 +12,7 @@ let objects = [];
 let animationController = null;
 let animationEnable = false;
 let prgmRun = false;
-let timer = parseInt(document.getElementById("lifeSpanInput").value) / 2; //Timer used for each iteration
+let timer = parseInt(document.getElementById("lifeSpanInput").value) / 10; //Timer used for each iteration (seconds)
 let iterationCount = 1;
 let timeline = [];
 
@@ -37,7 +37,8 @@ function main(){
     ctx.font = "24px Arial";
     ctx.fillText(`Current Year: ${iterationCount} | White: ${countType("white")} | Brown: ${countType("brown")}`, 20, 40);
     if(timer <= 0){
-        timer = parseInt(document.getElementById("lifeSpanInput").value) / 2;
+        objects = objects.filter(obj => obj.color !== "transparent");
+        timer = parseInt(document.getElementById("lifeSpanInput").value) / 10;
         iterationCount++;
         timeline.push({year: iterationCount, brown: countType("brown"), white: countType("white")});
         ColorAddItems(colors[0]);
@@ -71,6 +72,7 @@ function countType(colorType){
 function startSim() {
     if(!prgmRun){
         prgmRun = true;
+        timer = parseInt(document.getElementById("lifeSpanInput").value) / 10;
         updateRenderArray();
     }
     if(!animationEnable){
@@ -123,6 +125,7 @@ function resetSim() {
     pauseSim();
     prgmRun = false;
     iterationCount = 0;
+    timer = parseInt(document.getElementById("lifeSpanInput").value) / 10;
 }
 
 document.getElementById("startBtn").addEventListener("click", startSim);

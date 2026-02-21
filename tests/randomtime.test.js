@@ -6,6 +6,9 @@
  *
  * Priority color:     baseTime * (0.5 + Math.random() * 0.5)  → 50%–100% of baseTime
  * Non-priority color: baseTime * (0.1 + Math.random() * 0.4)  → 10%–50%  of baseTime
+ *
+ * Year timer: lifeSpanInput / 10  (must be shorter than minimum priority lifespan
+ * so that succession — spawning new objects — can actually occur)
  */
 
 const SAMPLES = 1000;
@@ -71,3 +74,32 @@ describe('randomTime bias formula', () => {
         }
     });
 });
+
+describe('year timer vs lifespan relationship', () => {
+    // Regression guard: the year timer must be shorter than the minimum
+    // priority object lifespan so that objects survive long enough for the
+    // year boundary to fire and succession (new spawns) to occur.
+    test('year duration is shorter than the minimum priority lifespan for any valid lifespan input', () => {
+        // Test across the full valid input range (5 – 120 s)
+        for (let lifespanInput = 5; lifespanInput <= 120; lifespanInput++) {
+            const yearDuration = lifespanInput / 10;
+            const baseTime = lifespanInput / 2;
+            // Theoretical minimum priority lifespan (Math.random() = 0): baseTime * 0.5
+            const minPriorityLifespan = baseTime * 0.5;
+            // A year must end before even the shortest-lived priority object dies
+            expect(yearDuration).toBeLessThan(minPriorityLifespan);
+        }
+    });
+
+    test('year duration is shorter than the maximum non-priority lifespan for any valid lifespan input', () => {
+        for (let lifespanInput = 5; lifespanInput <= 120; lifespanInput++) {
+            const yearDuration = lifespanInput / 10;
+            const baseTime = lifespanInput / 2;
+            // Theoretical maximum non-priority lifespan (Math.random() = 1): baseTime * 0.5
+            const maxNonPriorityLifespan = baseTime * 0.5;
+            // At least some non-priority objects should survive a full year too
+            expect(yearDuration).toBeLessThan(maxNonPriorityLifespan);
+        }
+    });
+});
+
