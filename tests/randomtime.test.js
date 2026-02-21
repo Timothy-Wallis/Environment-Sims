@@ -1,0 +1,73 @@
+/**
+ * Tests for the randomTime bias formula used in evolutionarytraitsim.js.
+ *
+ * The formula is tested in isolation (pure math) because randomTime() reads
+ * the DOM and module-level state that cannot be imported directly.
+ *
+ * Priority color:     baseTime * (0.5 + Math.random() * 0.5)  → 50%–100% of baseTime
+ * Non-priority color: baseTime * (0.1 + Math.random() * 0.4)  → 10%–50%  of baseTime
+ */
+
+const SAMPLES = 1000;
+
+function priorityTimer(baseTime) {
+    return Math.max(1, Math.floor(baseTime * (0.5 + Math.random() * 0.5)));
+}
+
+function nonPriorityTimer(baseTime) {
+    return Math.max(1, Math.floor(baseTime * (0.1 + Math.random() * 0.4)));
+}
+
+describe('randomTime bias formula', () => {
+    const baseTime = 15; // seconds — half of a 30 s lifespan
+
+    test('priority color timer stays within 50%–100% of baseTime', () => {
+        for (let i = 0; i < SAMPLES; i++) {
+            const val = priorityTimer(baseTime);
+            expect(val).toBeGreaterThanOrEqual(Math.floor(baseTime * 0.5));
+            expect(val).toBeLessThanOrEqual(baseTime);
+        }
+    });
+
+    test('non-priority color timer stays within 10%–50% of baseTime', () => {
+        for (let i = 0; i < SAMPLES; i++) {
+            const val = nonPriorityTimer(baseTime);
+            expect(val).toBeGreaterThanOrEqual(Math.floor(baseTime * 0.1));
+            expect(val).toBeLessThanOrEqual(Math.ceil(baseTime * 0.5));
+        }
+    });
+
+    test('priority color averages a longer lifespan than non-priority', () => {
+        let prioritySum = 0;
+        let nonPrioritySum = 0;
+        for (let i = 0; i < SAMPLES; i++) {
+            prioritySum += priorityTimer(baseTime);
+            nonPrioritySum += nonPriorityTimer(baseTime);
+        }
+        expect(prioritySum / SAMPLES).toBeGreaterThan(nonPrioritySum / SAMPLES);
+    });
+
+    test('priority mean is at least 2× the non-priority mean', () => {
+        let prioritySum = 0;
+        let nonPrioritySum = 0;
+        for (let i = 0; i < SAMPLES; i++) {
+            prioritySum += priorityTimer(baseTime);
+            nonPrioritySum += nonPriorityTimer(baseTime);
+        }
+        const ratio = (prioritySum / SAMPLES) / (nonPrioritySum / SAMPLES);
+        // Expected theoretical means: priority ≈ 11.25 s, non-priority ≈ 4.5 s → ratio ≈ 2.5
+        expect(ratio).toBeGreaterThan(2);
+    });
+
+    test('non-priority timer is always positive', () => {
+        for (let i = 0; i < SAMPLES; i++) {
+            expect(nonPriorityTimer(baseTime)).toBeGreaterThan(0);
+        }
+    });
+
+    test('priority timer is always positive', () => {
+        for (let i = 0; i < SAMPLES; i++) {
+            expect(priorityTimer(baseTime)).toBeGreaterThan(0);
+        }
+    });
+});

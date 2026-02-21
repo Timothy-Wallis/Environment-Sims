@@ -1,6 +1,6 @@
 /**
  * Tests for Obj — verifies that object timers are driven by real elapsed
- * milliseconds (delta time) rather than a raw frame-count decrement, so that
+ * seconds (delta time) rather than a raw frame-count decrement, so that
  * objects live for the same real-world duration on fast and slow devices.
  */
 
@@ -14,7 +14,7 @@ beforeAll(() => {
 describe('Obj timer — delta-time driven', () => {
     test('timer decreases by the supplied deltaTime value', () => {
         const obj = new Obj(100, 100, 500, 'brown');
-        obj.update(100); // simulate 100 ms elapsed
+        obj.update(100); // simulate 100 time units elapsed
         expect(obj.timer).toBeCloseTo(400, 0);
     });
 
@@ -24,10 +24,10 @@ describe('Obj timer — delta-time driven', () => {
         const objA = new Obj(0, 0, 1000, 'brown');
         const objB = new Obj(0, 0, 1000, 'brown');
 
-        // objA: one update of 200 ms
+        // objA: one update of 200 units
         objA.update(200);
 
-        // objB: four updates of 50 ms each (same 200 ms total)
+        // objB: four updates of 50 units each (same 200 units total)
         objB.update(50);
         objB.update(50);
         objB.update(50);
@@ -38,7 +38,7 @@ describe('Obj timer — delta-time driven', () => {
 
     test('object becomes transparent once timer reaches 0', () => {
         const obj = new Obj(0, 0, 50, 'brown');
-        obj.update(100); // deltaTime larger than remaining timer
+        obj.update(100); // deltaTime (seconds) larger than remaining timer
         expect(obj.color).toBe('transparent');
     });
 
@@ -50,15 +50,17 @@ describe('Obj timer — delta-time driven', () => {
     });
 
     test('frame-rate independence — 60 fps vs 120 fps give the same result', () => {
-        const totalMs = 300;
+        // Use an arbitrary total of 300 units split at different granularities
+        // to verify the timer accumulates correctly regardless of step size.
+        const totalDelta = 300;
 
-        // Simulate 300 ms at 60 fps (5 frames × ~60 ms)
+        // 5 equal steps (coarser, like 60 fps)
         const obj60 = new Obj(0, 0, 1000, 'brown');
-        for (let i = 0; i < 5; i++) obj60.update(totalMs / 5);
+        for (let i = 0; i < 5; i++) obj60.update(totalDelta / 5);
 
-        // Simulate 300 ms at 120 fps (10 frames × ~30 ms)
+        // 10 equal steps (finer, like 120 fps)
         const obj120 = new Obj(0, 0, 1000, 'brown');
-        for (let i = 0; i < 10; i++) obj120.update(totalMs / 10);
+        for (let i = 0; i < 10; i++) obj120.update(totalDelta / 10);
 
         expect(obj60.timer).toBeCloseTo(obj120.timer, 0);
     });

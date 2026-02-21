@@ -21,7 +21,7 @@ let priorityColor = colors[0];
 
 //main loop
 function main(){
-    const dt = deltaTime.update();
+    const dt = deltaTime.update() / 1000; // convert ms → seconds
     timer -= dt;
     animationController = requestAnimationFrame(main);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -141,7 +141,7 @@ function checkNumberInput(inputElement, min, max){
 }
 
 document.getElementById("amountInput").addEventListener("change", () => checkNumberInput(document.getElementById("amountInput"), 4, 50));
-document.getElementById("lifeSpanInput").addEventListener("change", () => checkNumberInput(document.getElementById("lifeSpanInput"), 1000, 10000));
+document.getElementById("lifeSpanInput").addEventListener("change", () => checkNumberInput(document.getElementById("lifeSpanInput"), 5, 120));
 document.getElementById("graphBtn").addEventListener("click", generateGraph);
 
 let graphOpen = false;
@@ -168,12 +168,12 @@ function generateGraph(){
 }}
 
 function randomTime(colorType ){
-    let randomTimerVal;
     let baseTime = parseInt(document.getElementById("lifeSpanInput").value) / 2;
     if(priorityColor == colorType){
-        randomTimerVal = Math.max(1, Math.floor((Math.random() - .2) * baseTime + 100));
+        // Priority color: lives 50%–100% of baseTime (strong survival advantage)
+        return Math.max(1, Math.floor(baseTime * (0.5 + Math.random() * 0.5)));
     }else{
-        randomTimerVal = Math.max(1, Math.floor((Math.random() - .5) * baseTime + 100));
+        // Non-priority color: lives 10%–50% of baseTime (strong survival disadvantage)
+        return Math.max(1, Math.floor(baseTime * (0.1 + Math.random() * 0.4)));
     }
-    return randomTimerVal;
 }
