@@ -12,7 +12,7 @@ let objects = [];
 let animationController = null;
 let animationEnable = false;
 let prgmRun = false;
-let timer = lifeSpanInput / 2; //Timer used for each iteration
+let timer = parseInt(document.getElementById("lifeSpanInput").value) / 2; //Timer used for each iteration
 let iterationCount = 1;
 let timeline = [];
 
@@ -21,12 +21,13 @@ let priorityColor = colors[0];
 
 //main loop
 function main(){
-    timer -= deltaTime.update();
+    const dt = deltaTime.update();
+    timer -= dt;
     animationController = requestAnimationFrame(main);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     for(let i = 0; i < objects.length; i++){
         let obj = objects[i];
-        obj.update();
+        obj.update(dt);
         ctx.fillStyle = obj.color;
         ctx.beginPath();
         ctx.arc(obj.x, obj.y, 5, 0, Math.PI * 2);
@@ -36,7 +37,7 @@ function main(){
     ctx.font = "24px Arial";
     ctx.fillText(`Current Year: ${iterationCount} | White: ${countType("white")} | Brown: ${countType("brown")}`, 20, 40);
     if(timer <= 0){
-        timer = lifeSpanInput / 2;
+        timer = parseInt(document.getElementById("lifeSpanInput").value) / 2;
         iterationCount++;
         timeline.push({year: iterationCount, brown: countType("brown"), white: countType("white")});
         ColorAddItems(colors[0]);
@@ -168,10 +169,11 @@ function generateGraph(){
 
 function randomTime(colorType ){
     let randomTimerVal;
+    let baseTime = parseInt(document.getElementById("lifeSpanInput").value) / 2;
     if(priorityColor == colorType){
-        randomTimerVal = Math.floor((Math.random() - .2) * timer + 100);
+        randomTimerVal = Math.max(1, Math.floor((Math.random() - .2) * baseTime + 100));
     }else{
-        randomTimerVal = Math.floor((Math.random() - .5) * timer + 100);
+        randomTimerVal = Math.max(1, Math.floor((Math.random() - .5) * baseTime + 100));
     }
     return randomTimerVal;
 }

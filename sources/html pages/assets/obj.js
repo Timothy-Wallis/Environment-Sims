@@ -7,10 +7,13 @@ export default class Obj {
         this.color = color;
         this.canvas = document.getElementById("simCanvas");
     }
-    update(){
+    update(deltaTime){
         if(this.timer > 0){
             this.moveRandom();
-            this.timer--;
+            this.timer -= deltaTime;
+            if(this.timer <= 0){
+                this.color = "transparent";
+            }
             return;
         }
         this.color = "transparent";
