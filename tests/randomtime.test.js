@@ -5,7 +5,7 @@
  * the DOM and module-level state that cannot be imported directly.
  *
  * Priority color:     baseTime * (0.5 + Math.random() * 0.5)  → 50%–100% of baseTime
- * Non-priority color: baseTime * (0.1 + Math.random() * 0.4)  → 10%–50%  of baseTime
+ * Non-priority color: baseTime * (0.2 + Math.random() * 0.4)  → 20%–60%  of baseTime
  *
  * Year timer: lifeSpanInput / 10  (must be shorter than minimum priority lifespan
  * so that succession — spawning new objects — can actually occur)
@@ -18,7 +18,7 @@ function priorityTimer(baseTime) {
 }
 
 function nonPriorityTimer(baseTime) {
-    return Math.max(1, Math.floor(baseTime * (0.1 + Math.random() * 0.4)));
+    return Math.max(1, Math.floor(baseTime * (0.2 + Math.random() * 0.4)));
 }
 
 describe('randomTime bias formula', () => {
@@ -32,11 +32,11 @@ describe('randomTime bias formula', () => {
         }
     });
 
-    test('non-priority color timer stays within 10%–50% of baseTime', () => {
+    test('non-priority color timer stays within 20%–60% of baseTime', () => {
         for (let i = 0; i < SAMPLES; i++) {
             const val = nonPriorityTimer(baseTime);
-            expect(val).toBeGreaterThanOrEqual(Math.floor(baseTime * 0.1));
-            expect(val).toBeLessThanOrEqual(Math.ceil(baseTime * 0.5));
+            expect(val).toBeGreaterThanOrEqual(Math.floor(baseTime * 0.2));
+            expect(val).toBeLessThanOrEqual(Math.ceil(baseTime * 0.6));
         }
     });
 
@@ -58,8 +58,8 @@ describe('randomTime bias formula', () => {
             nonPrioritySum += nonPriorityTimer(baseTime);
         }
         const ratio = (prioritySum / SAMPLES) / (nonPrioritySum / SAMPLES);
-        // Expected theoretical means: priority ≈ 11.25 s, non-priority ≈ 4.5 s → ratio ≈ 2.5
-        expect(ratio).toBeGreaterThan(2);
+        // Expected theoretical means: priority ≈ 11.25 s, non-priority ≈ 6 s → ratio ≈ 1.9
+        expect(ratio).toBeGreaterThan(1.5);
     });
 
     test('non-priority timer is always positive', () => {
@@ -95,8 +95,8 @@ describe('year timer vs lifespan relationship', () => {
         for (let lifespanInput = 5; lifespanInput <= 120; lifespanInput++) {
             const yearDuration = lifespanInput / 10;
             const baseTime = lifespanInput / 2;
-            // Theoretical maximum non-priority lifespan (Math.random() = 1): baseTime * 0.5
-            const maxNonPriorityLifespan = baseTime * 0.5;
+            // Theoretical maximum non-priority lifespan (Math.random() = 1): baseTime * 0.6
+            const maxNonPriorityLifespan = baseTime * 0.6;
             // At least some non-priority objects should survive a full year too
             expect(yearDuration).toBeLessThan(maxNonPriorityLifespan);
         }

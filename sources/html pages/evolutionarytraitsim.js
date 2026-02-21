@@ -176,7 +176,7 @@ function randomTime(colorType ){
         // Priority color: lives 50%–100% of baseTime (strong survival advantage)
         return Math.max(1, Math.floor(baseTime * (0.5 + Math.random() * 0.5)));
     }else{
-        // Non-priority color: lives 10%–50% of baseTime (strong survival disadvantage)
-        return Math.max(1, Math.floor(baseTime * (0.1 + Math.random() * 0.4)));
+        // Non-priority color: lives 20%–60% of baseTime (moderate survival disadvantage)
+        return Math.max(1, Math.floor(baseTime * (0.2 + Math.random() * 0.4)));
     }
 }
