@@ -16,7 +16,11 @@
         <hr>
         <input type="button" value="Return to Home Page" class="btn" style="display: block; margin: auto; margin-top: 2rem;" onclick="location.href='../../index.html'"/>
     </div>
-     
+    <script type="module">
+        import { Card } from "./assets/card.js";
+        let cardTest = new Card("Test Card", "https://picsum.photos/200/300", "This is a test card to see if the card class works");
+        document.body.appendChild(cardTest.generateCard());
+    </script>
     <footer id="licenseInfo">
         <p>Licensed under MIT License</p>
         <p>Created on Github Timothy-Wallis</p>
