@@ -146,6 +146,7 @@ body {
 #bg-gradient span:nth-child(3) {
 	width: 460px;
 	height: 460px;
+	background: #2d72e8;
 	background: color-mix(in srgb, var(--color-primary) 55%, var(--color-secondary));
 	top: 25%;
 	right: 10%;
@@ -155,6 +156,7 @@ body {
 #bg-gradient span:nth-child(4) {
 	width: 380px;
 	height: 380px;
+	background: #3577ef;
 	background: color-mix(in srgb, var(--color-secondary) 60%, var(--color-primary));
 	bottom: 18%;
 	left: 12%;
