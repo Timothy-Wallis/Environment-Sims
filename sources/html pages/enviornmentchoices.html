@@ -29,10 +29,10 @@
         <script>
             window.addEventListener('load', function () {
                 setTimeout(() => {
-                    var loadingPage = document.getElementById('loadingPage');
+                    const loadingPage = document.getElementById('loadingPage');
                     loadingPage.classList.add('fade-out');
 
-                    let loaded = document.getElementById('loaded');
+                    const loaded = document.getElementById('loaded');
                     if (loaded) {
                         loaded.style.display = 'block';
                     }
