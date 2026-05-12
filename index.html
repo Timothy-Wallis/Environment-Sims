@@ -27,8 +27,7 @@
         </div>
         <script>
             window.addEventListener('load', function () {
-                let run = false;
-                let timeoutID = setTimeout(() => {
+                setTimeout(() => {
                     var loadingPage = document.getElementById('loadingPage');
                     loadingPage.classList.add('fade-out');
 
@@ -36,11 +35,9 @@
                     if (loaded) {
                         loaded.style.display = 'block';
                     }
-                    if (run) {
-                        clearTimeout(timeoutID);
+                    setTimeout(() => {
                         loadingPage.style.display = 'none';
-                    }
-                    run = true;
+                    }, 500);
                 }, 2000);
             });
         </script>

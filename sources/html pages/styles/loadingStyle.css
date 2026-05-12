@@ -27,7 +27,7 @@ body {
   height: 100%;
   background-color: #000435;
   opacity: 1;
-  transition: opacity 1s ease;
+  transition: opacity 0.5s ease;
   -webkit-transition: opacity 0.5s ease;
   z-index: 9999;
 }
