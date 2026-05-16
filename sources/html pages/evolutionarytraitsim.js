@@ -1,68 +1,61 @@
-import DeltaTime from "./assets/deltatime.js";
-import Obj from "./assets/obj.js";
+import { canvas, ctx } from "./assets/canvas.js";
+import { DeltaTime, Second } from "./assets/deltatime.js";
+import { Obj, drawAll, randomTime, countType, ColorAddObjects, changePriorityColor, colors, lifeSpanInput, getTime, setTime, ObjectSize, ObjectAtIndex } from "./assets/obj.js";
 
-let canvas = document.querySelector("canvas");
-let ctx = canvas.getContext("2d");
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
-let lifeSpanInput = document.getElementById("lifeSpanInput").value;
-let deltaTime = new DeltaTime();
-
-let objects = [];
 let animationController = null;
 let animationEnable = false;
 let prgmRun = false;
-let timer = lifeSpanInput / 2; //Timer used for each iteration
 let iterationCount = 1;
 let timeline = [];
-
-const colors = ["brown", "white"];
-let priorityColor = colors[0];
+let ΔTime = new DeltaTime();
+let globalTimer = lifeSpanInput;
+let lastFrameTime = null;
+let fpsDisplay = 0;
+let frameMs = 0;
 
 //main loop
-function main(){
-    timer -= deltaTime.update();
+function main(timestamp){
     animationController = requestAnimationFrame(main);
+
+    // Compute delta time and smooth FPS
+    if(lastFrameTime === null) lastFrameTime = timestamp;
+    const deltaMs = timestamp - lastFrameTime;
+    frameMs = deltaMs;
+    const instantFps = deltaMs > 0 ? 1000 / deltaMs : 0;
+    const smoothing = 0.1;
+    fpsDisplay = fpsDisplay ? (fpsDisplay * (1 - smoothing) + instantFps * smoothing) : instantFps;
+    lastFrameTime = timestamp;
+
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    for(let i = 0; i < objects.length; i++){
-        let obj = objects[i];
-        obj.update();
-        ctx.fillStyle = obj.color;
-        ctx.beginPath();
-        ctx.arc(obj.x, obj.y, 5, 0, Math.PI * 2);
-        ctx.fill();
-    }
+    drawAll();
     ctx.fillStyle = "skyblue";
     ctx.font = "24px Arial";
+    ctx.textAlign = "left";
     ctx.fillText(`Current Year: ${iterationCount} | White: ${countType("white")} | Brown: ${countType("brown")}`, 20, 40);
-    if(timer <= 0){
-        timer = lifeSpanInput / 2;
+
+    // Draw FPS/debug in top-right
+    const fpsText = `FPS: ${fpsDisplay.toFixed(1)} | Δ: ${frameMs.toFixed(1)}ms`;
+    ctx.font = "16px Arial";
+    ctx.textAlign = "right";
+    const padding = 8;
+    const textWidth = ctx.measureText(fpsText).width;
+    const boxWidth = textWidth + padding * 2;
+    const boxHeight = 22 + padding;
+    const boxX = canvas.width - boxWidth - 10;
+    const boxY = 10;
+    ctx.fillStyle = "rgba(0,0,0,0.5)";
+    ctx.fillRect(boxX, boxY, boxWidth, boxHeight);
+    ctx.fillStyle = "white";
+    ctx.fillText(fpsText, canvas.width - 10 - padding, boxY + 20);
+    ctx.textAlign = "left";
+
+    if(globalTimer <= 0){
+        globalTimer = lifeSpanInput;
         iterationCount++;
         timeline.push({year: iterationCount, brown: countType("brown"), white: countType("white")});
-        ColorAddItems(colors[0]);
-        ColorAddItems(colors[1]);
+        ColorAddObjects(colors[0]);
+        ColorAddObjects(colors[1]);
     }
-}
-
-function ColorAddItems(colorType){
-    let count = countType(colorType);
-    for(let i = 0; i < Math.floor(count / 2); i++){
-        let randomTimer = randomTime(colorType);
-        objects.push(new Obj(Math.random() * canvas.width, Math.random() * canvas.height, randomTimer, colorType));
-    }
-}
-
-function countType(colorType){
-    let colorCount = {
-        brown: 0,
-        white: 0
-    }
-    for(let i = 0; i < objects.length; i++){
-        if(objects[i].color == colorType){
-            colorCount[colorType]++;
-        }
-    }
-    return colorCount[colorType];
 }
 
 
@@ -74,6 +67,18 @@ function startSim() {
     }
     if(!animationEnable){
         animationEnable = true;
+        // A fancier timeout function 
+        ΔTime.onTick(() => {
+            globalTimer--;
+            for(let i = ObjectSize() - 1; i >= 0; i--){
+                let currentObj = ObjectAtIndex(i);
+                if(currentObj.timer > 0){
+                    currentObj.timer--;
+                }else{
+                    currentObj.destroy();
+                }
+            }
+        }, globalTimer * Second);
         main();
         return;
     }
@@ -82,20 +87,20 @@ function startSim() {
 function updateRenderArray(){
     //Updates render array based on the amount to be generated
     let amount = document.getElementById("amountInput").value;
-    if(objects.length > 0){
-        objects = [];
+    if(Obj.objects.length > 0){
+        Obj.objects = [];
     }
     for(let i = 0; i < amount; i++ ){
         let tempCount = amount/2;
         let tempColor = colors[0];
-        let randomTimer;
+        let rTime;
         if(i < tempCount){
             tempColor = colors[0];
         }else{
             tempColor = colors[1];
         }
-        randomTimer = randomTime(tempColor);
-        objects.push(new Obj(Math.random() * canvas.width, Math.random() * canvas.height, randomTimer, tempColor));
+        rTime = randomTime(tempColor);
+       new Obj(Math.random() * canvas.width, Math.random() * canvas.height, rTime, tempColor);
     }
 }
 
@@ -103,22 +108,15 @@ function updateRenderArray(){
 function pauseSim() {
     cancelAnimationFrame(animationController);
     animationEnable = false;
-}
-//Change color of all objects
-function changePriorityColor() {
-    let label = document.querySelector("label[for='changeColorBtn']");
-    if(priorityColor == colors[0]){
-        priorityColor = colors[1];
-        label.textContent = "Current Color: White";
-    }else{
-        priorityColor = colors[0];
-        label.textContent = "Current Color: Brown";
-    }
+    ΔTime.destroy();
+    lastFrameTime = null;
+    fpsDisplay = 0;
+    frameMs = 0;
 }
 
 function resetSim() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    objects = [];
+    Obj.objects = [];
     pauseSim();
     prgmRun = false;
     iterationCount = 0;
@@ -140,38 +138,4 @@ function checkNumberInput(inputElement, min, max){
 }
 
 document.getElementById("amountInput").addEventListener("change", () => checkNumberInput(document.getElementById("amountInput"), 4, 50));
-document.getElementById("lifeSpanInput").addEventListener("change", () => checkNumberInput(document.getElementById("lifeSpanInput"), 1000, 10000));
-document.getElementById("graphBtn").addEventListener("click", generateGraph);
-
-let graphOpen = false;
-
-function generateGraph(){
-    if(graphOpen){
-        graphOpen = false;
-        document.getElementById("graphBtn").value = "Show Graph";
-        main();
-    }else{
-        graphOpen = true;
-    document.getElementById("graphBtn").value = "Close Graph";
-    pauseSim();
-    //Graph Code
-    ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
-    ctx.fillRect(canvas.width / 4, canvas.height / 4, canvas.width / 2, canvas.height / 2);
-    ctx.strokeStyle = "black";
-    ctx.beginPath();
-    ctx.moveTo(canvas.width / 4 + 10, canvas.height / 4 + 10);
-    ctx.lineTo(canvas.width / 4 + 10, canvas.height / 2 - 10);
-    ctx.lineTo(canvas.width / 2 - 10, canvas.height / 2 - 10);
-    ctx.stroke();
-    //Plot Data
-}}
-
-function randomTime(colorType ){
-    let randomTimerVal;
-    if(priorityColor == colorType){
-        randomTimerVal = Math.floor((Math.random() - .2) * timer + 100);
-    }else{
-        randomTimerVal = Math.floor((Math.random() - .5) * timer + 100);
-    }
-    return randomTimerVal;
-}
+document.getElementById("lifeSpanInput").addEventListener("change", () => checkNumberInput(document.getElementById("lifeSpanInput"), 1, 20));
