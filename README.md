@@ -1,10 +1,14 @@
-# 🌿 Ecosystem Simulator
+# 🌿 Ecosystem Simulator - Archived 
 
 An interactive, browser-based educational tool designed to visualise and teach core concepts in ecology and evolutionary biology. Built for classroom use, the simulator requires no installation — just open a browser and start exploring.
 
 [![Live Demo](https://img.shields.io/badge/Live%20Demo-ecosystemsim.vercel.app-brightgreen)](https://ecosystemsim.vercel.app)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 ![Version](https://img.shields.io/badge/version-1.2.0-informational)
+
+---
+
+Due To Improvements for web capabilities, this website is now archived, and is designated for view only. For the up to date project, refer to Iterum Sciences, which will host all teaching simulations. 
 
 ---
 
